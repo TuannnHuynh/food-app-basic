@@ -2,6 +2,8 @@ import axios from "axios";
 import { createContext, ReactNode, useState } from "react";
 
 type TGloblaContextProps = {
+  recipeList: TRecipeList;
+  loading: boolean;
   searchParam: string;
   setSearchParam: React.Dispatch<React.SetStateAction<string>>;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -11,21 +13,21 @@ type TGloblaStateProps = {
   children: ReactNode;
 };
 
-type TRecipeList = {
-  recipes: {
-    publisher: string;
-    image_url: string;
-    title: string;
-    id: string;
-  };
+export type TRecipeItem = {
+  publisher: string;
+  image_url: string;
+  title: string;
+  id: string;
 };
+
+export type TRecipeList = TRecipeItem[];
 
 export const GlobalContext = createContext<TGloblaContextProps | null>(null);
 
 export const GlobalState = ({ children }: TGloblaStateProps): JSX.Element => {
   const [searchParam, setSearchParam] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [recipeList, setRecipeList] = useState<TRecipeList[]>([]);
+  const [recipeList, setRecipeList] = useState<TRecipeList>([]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,11 +49,16 @@ export const GlobalState = ({ children }: TGloblaStateProps): JSX.Element => {
       setSearchParam("");
     }
   };
-  console.log(recipeList);
 
   return (
     <GlobalContext.Provider
-      value={{ searchParam, setSearchParam, handleSubmit }}
+      value={{
+        recipeList,
+        loading,
+        searchParam,
+        setSearchParam,
+        handleSubmit,
+      }}
     >
       {children}
     </GlobalContext.Provider>
