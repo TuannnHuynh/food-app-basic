@@ -18,7 +18,7 @@ const Home = () => {
   return (
     <div className="container mx-auto flex flex-wrap justify-center gap-10 py-8">
       {recipeList && recipeList.length > 0 ? (
-        recipeList.map((val) => <RecipeItem item={val} />)
+        recipeList.map((val) => <RecipeItem key={val.id} item={val} />)
       ) : (
         <div>
           <p className="text-center text-xl lg:text-4xl">

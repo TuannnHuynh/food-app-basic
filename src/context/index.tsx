@@ -1,8 +1,16 @@
 import axios from "axios";
 import { createContext, ReactNode, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type TGloblaContextProps = {
+  handleAddToFavorites: (getCurrentItem: TRecipeDetails) => void;
+  favoritesList: TRecipeDetails[];
+  setFavoritesList: React.Dispatch<React.SetStateAction<TRecipeDetails[]>>;
   recipeList: TRecipeList;
+  recipeDetailsData: TRecipeDetails | null;
+  setRecipeDetailsData: React.Dispatch<
+    React.SetStateAction<TRecipeDetails | null>
+  >;
   loading: boolean;
   searchParam: string;
   setSearchParam: React.Dispatch<React.SetStateAction<string>>;
@@ -20,7 +28,17 @@ export type TRecipeItem = {
   id: string;
 };
 
-export type TRecipeList = TRecipeItem[];
+type TIngredient = {
+  quantity: number | null;
+  unit: string | null;
+  description: string;
+};
+
+type TRecipeDetails = TRecipeItem & {
+  ingredients: TIngredient[];
+};
+
+type TRecipeList = TRecipeItem[];
 
 export const GlobalContext = createContext<TGloblaContextProps | null>(null);
 
@@ -28,6 +46,11 @@ export const GlobalState = ({ children }: TGloblaStateProps): JSX.Element => {
   const [searchParam, setSearchParam] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [recipeList, setRecipeList] = useState<TRecipeList>([]);
+  const [recipeDetailsData, setRecipeDetailsData] =
+    useState<TRecipeDetails | null>(null);
+  const [favoritesList, setFavoritesList] = useState<TRecipeDetails[]>([]);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,6 +65,7 @@ export const GlobalState = ({ children }: TGloblaStateProps): JSX.Element => {
         setRecipeList(data.recipes);
         setLoading(false);
         setSearchParam("");
+        navigate("/");
       }
     } catch (error) {
       console.log(error);
@@ -49,10 +73,28 @@ export const GlobalState = ({ children }: TGloblaStateProps): JSX.Element => {
       setSearchParam("");
     }
   };
+  const handleAddToFavorites = (getCurrentItem: TRecipeDetails) => {
+    const cpyFavoritesList = [...favoritesList];
+    const index = cpyFavoritesList.findIndex(
+      (val) => val.id === getCurrentItem.id,
+    );
+    if (index === -1) {
+      cpyFavoritesList.push(getCurrentItem);
+    } else {
+      cpyFavoritesList.splice(index);
+    }
+    setFavoritesList(cpyFavoritesList);
+  };
+  console.log(favoritesList, "favoritesList");
 
   return (
     <GlobalContext.Provider
       value={{
+        handleAddToFavorites,
+        favoritesList,
+        setFavoritesList,
+        recipeDetailsData,
+        setRecipeDetailsData,
         recipeList,
         loading,
         searchParam,
